@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}<title>Записи сообщества {{ group.title }} | Yatube</title>{% endblock %}
+{% block header %}{{ group.title }}{% endblock %}
+{% block content %}
+
+{% load thumbnail %}
+
+    <h1>{{ group.title }}</h1>
+    <p> {{ group.description|linebreaks }}</p>
+    <hr>
+    
+    {% for post in page %}
+        {% include "post_item.html" with post=post %}
+    {% endfor %}
+
+{% if page.has_other_pages %} 
+    {% include 'paginator.html' with item=page paginator=paginator %} 
+{% endif %}
+{% endblock %}
