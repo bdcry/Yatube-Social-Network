@@ -149,10 +149,9 @@ class TestFollowSystem(TestCase):
         self.client = Client()
         self.following = User.objects.create(
             username='TestFollowing', password='password')
-        self.follower = User.objects.create(username='TestFollower',
-                                                 password='password')
-        self.user = User.objects.create(username='user',
-                                             password='password')
+        self.follower = User.objects.create(
+            username='TestFollower', password='password')
+        self.user = User.objects.create(username='user', password='password')
         self.post = Post.objects.create(author=self.following,
                                         text='FollowTest')
         self.client.force_login(self.follower)

@@ -140,6 +140,7 @@ def follow_index(request):
     return render(request, 'follow.html', {
         'page': page, 'paginator': paginator})
 
+
 @login_required
 def profile_follow(request, username):
     user = get_object_or_404(User, username=username)
@@ -147,6 +148,7 @@ def profile_follow(request, username):
         Follow.objects.get_or_create(user=request.user, author=user)
         return redirect('profile', username)
     return redirect('profile', username)
+
 
 @login_required
 def profile_unfollow(request, username):
