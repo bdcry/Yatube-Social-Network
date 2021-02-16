@@ -18,8 +18,8 @@ class GroupAdmin(admin.ModelAdmin):
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'author', 'text', 'active')
-    list_filter = ('created',)
+    list_display = ("pk", "author", "text", "active")
+    list_filter = ("created",)
 
 
 admin.site.register(Post, PostAdmin)

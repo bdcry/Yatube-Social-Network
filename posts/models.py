@@ -21,7 +21,7 @@ class Post(models.Model):
     group = models.ForeignKey(
         Group, blank=True, null=True,
         on_delete=models.SET_NULL, related_name="posts")
-    image = models.ImageField(upload_to='posts/', blank=True, null=True)
+    image = models.ImageField(upload_to="posts/", blank=True, null=True)
 
     class Meta:
         ordering = ["-pub_date"]
@@ -36,30 +36,30 @@ class Comment(models.Model):
         blank=False,
         null=False,
         on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Пост с комментарием',
+        related_name="comments",
+        verbose_name="Пост с комментарием",
     )
     author = models.ForeignKey(
         User,
         blank=False,
         null=False,
         on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор комментария',
+        related_name="comments",
+        verbose_name="Автор комментария",
     )
     text = models.TextField(
-        verbose_name='Текст комментария',
+        verbose_name="Текст комментария",
     )
     created = models.DateTimeField(
-        verbose_name='Дата публикации',
+        verbose_name="Дата публикации",
         auto_now_add=True,
     )
     active = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ('-created',)
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
+        ordering = ("-created",)
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
 
     def __str__(self):
         comment_text = self.text[:20]

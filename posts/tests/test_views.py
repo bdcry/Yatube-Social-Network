@@ -2,7 +2,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 from yatube.settings import PAGINATOR_LIMIT
-
+from django.core.files.uploadedfile import SimpleUploadedFile
 from posts.models import Group, Post, User, Comment, Follow
 
 NEW_URL = reverse('new_post')
@@ -46,14 +46,14 @@ class PostPagesTests(TestCase):
             'post',
             args=(cls.user.username, cls.post.id)
         )
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
         # Создаем пост с картинкой
-        cls.guest_client.login(username=TESTUSER, password="141312zs")
-        with open('media/posts/2627_pepe_hmm.png', 'rb') as f_obj:
-            cls.guest_client.post(
-                NEW_URL,
-                {'text': "test text",
-                 'image': f_obj,
-                 'group': cls.group.id})
+        cls.uploaded = SimpleUploadedFile(
+            'small.gif', small_gif, content_type='image/gif')
 
     def test_post_page_show_correct_context(self):
         """Страницa post сформированa с правильным контекстом."""
@@ -109,21 +109,21 @@ class PostPagesTests(TestCase):
         # Ищем картинку на главной странице
         response = self.client.get(INDEX_URL)
         self.assertContains(
-            response, '<img', status_code=200, count=0,
+            response, self.uploaded, status_code=200, count=0,
             msg_prefix='Тэг не найден на главной странице',
             html=False
         )
         # На странице поста
         response = self.client.get(USER_URL)
         self.assertContains(
-            response, '<img', status_code=200, count=0,
+            response, self.uploaded, status_code=200, count=0,
             msg_prefix='Тэг не найден на странице профиля',
             html=False
         )
         # На странице группы
         response = self.client.get(GROUP_URL)
         self.assertContains(
-            response, '<img', status_code=200, count=0,
+            response, self.uploaded, status_code=200, count=0,
             msg_prefix='Тэг не найден на странице группы',
             html=False
         )
@@ -160,7 +160,8 @@ class TestFollowSystem(TestCase):
 
     def test_follow(self):
         """
-        Авторизованный пользователь может подписываться на других пользователей.
+        Авторизованный пользователь может подписываться на
+        других пользователей.
         """
         response = self.client.get(reverse('profile_follow', kwargs={
             'username': self.following}), follow=True)
@@ -170,14 +171,14 @@ class TestFollowSystem(TestCase):
 
     def test_unfollow(self):
         """
-        Авторизованный пользователь может удалять других пользователей из подписок.
+        Авторизованный пользователь может удалять
+        других пользователей из подписок.
         """
         response = self.client.get(
             reverse('profile_unfollow',
                     kwargs={'username': self.following}),
             follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(self.link.exists())
         self.assertEqual(0, Follow.objects.count())
 
     def test_follow_index(self):

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
-from .models import Post, Group, User, Comment, Follow
+from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 from yatube.settings import PAGINATOR_LIMIT
 
@@ -54,31 +54,27 @@ def profile(request, username):
     paginator = Paginator(post_list, PAGINATOR_LIMIT)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-
+    following = False
     if request.user.is_authenticated:
         following = author.following.filter(user=request.user).exists()
-        return render(request, "profile.html", {
-            'author': author,
-            'page': page, 'paginator': paginator, 'following': following})
-    return render(request, "profile.html", {
-        'author': author, 'page': page, 'paginator': paginator})
+    return render(request, 'profile.html', {
+        'author': author,
+        'page': page,
+        'paginator': paginator,
+        'following': following})
 
 
 def post_view(request, username, post_id):
-    username = get_object_or_404(User, username=username)
-    post = get_object_or_404(Post, pk=post_id)
-    count = Post.objects.filter(
-        author=username).select_related('author').count()
-    form = CommentForm(request.POST)
-    comment = Comment.objects.filter(post=post_id)
-    context = {
-        'post': post,
-        'author': post.author,
-        'count': count,
-        'comments': comment,
-        'form': form
-    }
-    return render(request, 'post.html', context)
+    post = get_object_or_404(Post.objects.select_related('author'),
+                             id=post_id, author__username=username)
+    form = CommentForm()
+    comments = post.comments.all()
+    author = post.author
+    return render(
+        request,
+        'post.html',
+        {'post': post, 'author': author, 'comments': comments, 'form': form}
+    )
 
 
 @login_required
@@ -116,29 +112,36 @@ def server_error(request):
 
 @login_required
 def add_comment(request, post_id, username):
-    post = get_object_or_404(Post, pk=post_id)
-    form = CommentForm(request.POST)
-    if request.method == 'POST':
-        if form.is_valid():
-            form = form.save(commit=False)
-            form.author = request.user
-            form.post = post
-            form.save()
-            return redirect('post', username, post_id)
-        return render(request, 'comments.html', {'form': form})
-    return render(request, 'comments.html', {'form': form, 'post': post})
+    post = get_object_or_404(Post,
+                             pk=post_id,
+                             author__username=username)
+    form = CommentForm(request.POST or None)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.author = request.user
+        comment.post = post
+        form.save()
+        return redirect('post', username, post_id)
+    return redirect('post', username, post_id)
 
 
 @login_required
 def follow_index(request):
-    follows = Follow.objects.filter(user=request.user).values('author')
-    following_list = Post.objects.filter(
-        author_id__in=follows).order_by("-pub_date")
-    paginator = Paginator(following_list, PAGINATOR_LIMIT)
+    post_list = (
+        Post.objects.select_related('author').filter(
+            author__following__user=request.user)
+    )
+    paginator = Paginator(post_list, PAGINATOR_LIMIT)
+
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    return render(request, 'follow.html', {
-        'page': page, 'paginator': paginator})
+    return render(request,
+                  'follow.html',
+                  {
+                      'paginator': paginator,
+                      'page': page,
+
+                  })
 
 
 @login_required
@@ -146,7 +149,6 @@ def profile_follow(request, username):
     user = get_object_or_404(User, username=username)
     if request.user != user:
         Follow.objects.get_or_create(user=request.user, author=user)
-        return redirect('profile', username)
     return redirect('profile', username)
 
 
