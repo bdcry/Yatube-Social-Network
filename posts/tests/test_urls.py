@@ -1,10 +1,9 @@
-from uuid import uuid1
 from random import randint
-from django.test import TestCase, Client
+from uuid import uuid1
+
+from django.test import Client, TestCase
 from django.urls import reverse
-
 from posts.models import Group, Post, User
-
 
 NEW_URL = reverse('new_post')
 INDEX_URL = reverse('index')

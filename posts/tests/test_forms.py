@@ -1,8 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
-
 from posts.models import Group, Post, User
-
 
 SLUG = 'test_slug'
 NEW_URL = reverse('new_post')

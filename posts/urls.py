@@ -2,12 +2,11 @@ from django.urls import path
 
 from . import views
 
-
 urlpatterns = [
     path("",
          views.index,
          name="index"),
-    path('group/<slug:slug>/',
+    path("group/<slug:slug>/",
          views.group_posts,
          name="group_posts"),
     path("new/",
@@ -25,7 +24,7 @@ urlpatterns = [
     path("<str:username>/<int:post_id>/edit/",
          views.post_edit,
          name="post_edit"),
-    path("<username>/<int:post_id>/comment",
+    path("<username>/<int:post_id>/comment/",
          views.add_comment,
          name="add_comment"),
     path("<str:username>/follow/",

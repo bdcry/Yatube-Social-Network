@@ -1,9 +1,9 @@
+from django import forms
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
-from django import forms
+from posts.models import Comment, Follow, Group, Post, User
 from yatube.settings import PAGINATOR_LIMIT
-from django.core.files.uploadedfile import SimpleUploadedFile
-from posts.models import Group, Post, User, Comment, Follow
 
 NEW_URL = reverse('new_post')
 INDEX_URL = reverse('index')
